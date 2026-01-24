@@ -1,0 +1,160 @@
+---
+---
+
+@import "minima";
+
+// ===== Page-specific background colors =====
+// Home page - light sky blue
+body.page-index {
+  background: linear-gradient(135deg, #e8f4fc 0%, #f0f8ff 50%, #e6f2ff 100%);
+  min-height: 100vh;
+}
+
+// Budget page - light mint green
+body.page-budget {
+  background: linear-gradient(135deg, #e8f8f0 0%, #f0fff5 50%, #e6fff0 100%);
+  min-height: 100vh;
+}
+
+// Expense page - light peach/coral
+body.page-expense {
+  background: linear-gradient(135deg, #fff5f0 0%, #fff8f5 50%, #fff0eb 100%);
+  min-height: 100vh;
+}
+
+// Settings page - light lavender
+body.page-settings {
+  background: linear-gradient(135deg, #f5f0ff 0%, #f8f5ff 50%, #f0ebff 100%);
+  min-height: 100vh;
+}
+
+// Login page - light warm gray
+body.page-login {
+  background: linear-gradient(135deg, #f8f6f4 0%, #faf8f6 50%, #f5f3f0 100%);
+  min-height: 100vh;
+}
+
+// Unauthorized page - light rose
+body.page-unauthorized {
+  background: linear-gradient(135deg, #fff0f3 0%, #fff5f7 50%, #ffebef 100%);
+  min-height: 100vh;
+}
+
+// Prevent bounce effect
+// html {
+//   overscroll-behavior: none !important;
+//   overscroll-behavior-y: none !important;
+//   overscroll-behavior-x: none !important;
+//   -webkit-overflow-scrolling: touch;
+// }
+
+// body {
+//   overscroll-behavior: none !important;
+//   overscroll-behavior-y: none !important;
+//   overscroll-behavior-x: none !important;
+//   -webkit-overflow-scrolling: touch;
+// }
+
+.wrapper {
+  max-width: -webkit-calc(1000px - (30px * 2));
+  max-width: calc(1000px - (30px * 2));
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 30px;
+  padding-left: 30px;
+}
+
+// Keep header always floating on top to avoid being covered by content or floating areas
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  background-color: #fff; // Remove transparent effect
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Add shadow to distinguish header
+}
+
+// Hide logout button (no longer displayed in top right corner)
+#user-info {
+  display: none !important;
+}
+
+// Ensure logout button style in hamburger menu
+.site-nav .logout-link {
+  color: #dc3545 !important;
+  font-weight: 500;
+}
+
+// Mobile: logout button at bottom of hamburger menu
+@media (max-width: 600px) {
+  .site-nav .trigger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: calc(100vh - 60px);
+    padding-bottom: 20px;
+  }
+  
+  .site-nav .logout-link {
+    margin-top: auto;
+    border-top: 1px solid #e8e8e8;
+    padding-top: 10px;
+    text-align: center;
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+}
+
+// Unify navigation bar (index bar) font size
+.site-title,
+.site-title a {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.site-nav .page-link {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+// Adjust navigation order: move expense button to the leftmost (left side of hamburger menu)
+.site-nav {
+  display: flex;
+}
+
+.site-nav .page-link[href*="/expense/"] {
+  order: -1;
+}
+
+// Unify main title (header title) size and style for all pages
+.post-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+// Login page styles
+#buttonDiv {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.error-message {
+  display: none;
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px 20px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+.security-note {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  margin-top: 30px;
+}

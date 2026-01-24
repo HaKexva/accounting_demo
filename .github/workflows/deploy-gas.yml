@@ -1,0 +1,175 @@
+name: Deploy Google Apps Script
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gs/**'
+      - '.github/workflows/deploy-gas.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+concurrency:
+  group: gas-deploy
+  cancel-in-progress: false  # Queue instead of cancel to ensure deployments complete
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0  # Full history for rebase
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      - name: Setup clasp credentials
+        run: echo '${{ secrets.CLASP_TOKEN }}' > ~/.clasprc.json
+
+      # Deploy Budget Script
+      - name: Push budget script
+        working-directory: ./gs/budget
+        run: clasp push --force
+
+      - name: Deploy budget script and get URL
+        id: deploy-budget
+        working-directory: ./gs/budget
+        run: |
+          # First, create a new version
+          VERSION_OUTPUT=$(clasp version "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+          echo "$VERSION_OUTPUT"
+          VERSION_NUM=$(echo "$VERSION_OUTPUT" | grep -oE 'Created version ([0-9]+)' | grep -oE '[0-9]+')
+          echo "Created version: $VERSION_NUM"
+
+          # Get existing versioned deployment ID (skip @HEAD which is read-only)
+          EXISTING_DEPLOY_ID=$(clasp deployments | grep -E "^- AKfycb" | grep -v "@HEAD" | head -1 | awk '{print $2}')
+          echo "Existing versioned deployment ID: $EXISTING_DEPLOY_ID"
+
+          if [ -n "$EXISTING_DEPLOY_ID" ] && [ -n "$VERSION_NUM" ]; then
+            # Update existing deployment to use the new version
+            OUTPUT=$(clasp deploy --deploymentId "$EXISTING_DEPLOY_ID" --versionNumber "$VERSION_NUM" --description "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+            DEPLOY_ID="$EXISTING_DEPLOY_ID"
+          elif [ -n "$VERSION_NUM" ]; then
+            # Create new deployment with the new version
+            OUTPUT=$(clasp deploy --versionNumber "$VERSION_NUM" --description "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+            DEPLOY_ID=$(echo "$OUTPUT" | grep -oE 'AKfycb[a-zA-Z0-9_-]+' | head -1)
+          else
+            # Fallback: create deployment without version (will use HEAD)
+            OUTPUT=$(clasp deploy --description "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+            DEPLOY_ID=$(echo "$OUTPUT" | grep -oE 'AKfycb[a-zA-Z0-9_-]+' | head -1)
+          fi
+          echo "$OUTPUT"
+          echo "Deployment ID: $DEPLOY_ID"
+
+          # Construct the web app URL from deployment ID
+          if [ -n "$DEPLOY_ID" ]; then
+            URL="https://script.google.com/macros/s/${DEPLOY_ID}/exec"
+            echo "url=$URL" >> $GITHUB_OUTPUT
+            echo "Constructed URL: $URL"
+          else
+            echo "ERROR: Could not extract deployment ID"
+          fi
+
+      # Deploy Expense Script
+      - name: Push expense script
+        working-directory: ./gs/expense
+        run: clasp push --force
+
+      - name: Deploy expense script and get URL
+        id: deploy-expense
+        working-directory: ./gs/expense
+        run: |
+          # First, create a new version
+          VERSION_OUTPUT=$(clasp version "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+          echo "$VERSION_OUTPUT"
+          VERSION_NUM=$(echo "$VERSION_OUTPUT" | grep -oE 'Created version ([0-9]+)' | grep -oE '[0-9]+')
+          echo "Created version: $VERSION_NUM"
+
+          # Get existing versioned deployment ID (skip @HEAD which is read-only)
+          EXISTING_DEPLOY_ID=$(clasp deployments | grep -E "^- AKfycb" | grep -v "@HEAD" | head -1 | awk '{print $2}')
+          echo "Existing versioned deployment ID: $EXISTING_DEPLOY_ID"
+
+          if [ -n "$EXISTING_DEPLOY_ID" ] && [ -n "$VERSION_NUM" ]; then
+            # Update existing deployment to use the new version
+            OUTPUT=$(clasp deploy --deploymentId "$EXISTING_DEPLOY_ID" --versionNumber "$VERSION_NUM" --description "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+            DEPLOY_ID="$EXISTING_DEPLOY_ID"
+          elif [ -n "$VERSION_NUM" ]; then
+            # Create new deployment with the new version
+            OUTPUT=$(clasp deploy --versionNumber "$VERSION_NUM" --description "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+            DEPLOY_ID=$(echo "$OUTPUT" | grep -oE 'AKfycb[a-zA-Z0-9_-]+' | head -1)
+          else
+            # Fallback: create deployment without version (will use HEAD)
+            OUTPUT=$(clasp deploy --description "Auto-deploy $(date +'%Y-%m-%d %H:%M')" 2>&1)
+            DEPLOY_ID=$(echo "$OUTPUT" | grep -oE 'AKfycb[a-zA-Z0-9_-]+' | head -1)
+          fi
+          echo "$OUTPUT"
+          echo "Deployment ID: $DEPLOY_ID"
+
+          # Construct the web app URL from deployment ID
+          if [ -n "$DEPLOY_ID" ]; then
+            URL="https://script.google.com/macros/s/${DEPLOY_ID}/exec"
+            echo "url=$URL" >> $GITHUB_OUTPUT
+            echo "Constructed URL: $URL"
+          else
+            echo "ERROR: Could not extract deployment ID"
+          fi
+
+      # Update URLs in .md files
+      - name: Update URLs in source files
+        run: |
+          BUDGET_URL="${{ steps.deploy-budget.outputs.url }}"
+          EXPENSE_URL="${{ steps.deploy-expense.outputs.url }}"
+
+          echo "Budget URL: $BUDGET_URL"
+          echo "Expense URL: $EXPENSE_URL"
+
+          if [ -n "$BUDGET_URL" ]; then
+            # Update baseBudget in all .md files
+            sed -i "s|const baseBudget.*=.*\"https://script.google.com/macros/s/[^\"]*\"|const baseBudget = \"$BUDGET_URL\"|g" budget.md
+            sed -i "s|const baseBudget.*=.*\"https://script.google.com/macros/s/[^\"]*\"|const baseBudget  = \"$BUDGET_URL\"|g" expense.md
+            sed -i "s|const baseBudget.*=.*\"https://script.google.com/macros/s/[^\"]*\"|const baseBudget  = \"$BUDGET_URL\"|g" setting.md
+          fi
+
+          if [ -n "$EXPENSE_URL" ]; then
+            # Update baseExpense in all .md files
+            sed -i "s|const baseExpense.*=.*\"https://script.google.com/macros/s/[^\"]*\"|const baseExpense = \"$EXPENSE_URL\"|g" budget.md
+            sed -i "s|const baseExpense.*=.*\"https://script.google.com/macros/s/[^\"]*\"|const baseExpense = \"$EXPENSE_URL\"|g" expense.md
+            sed -i "s|const baseExpense.*=.*\"https://script.google.com/macros/s/[^\"]*\"|const baseExpense = \"$EXPENSE_URL\"|g" setting.md
+          fi
+
+      - name: Commit and push URL updates
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No URL changes to commit"
+          else
+            git commit -m "Auto-update Apps Script deployment URLs
+
+            🤖 Generated with GitHub Actions"
+
+            # Retry push with rebase to handle race conditions
+            MAX_RETRIES=3
+            for i in $(seq 1 $MAX_RETRIES); do
+              if git push; then
+                echo "Push successful"
+                break
+              else
+                echo "Push failed, attempt $i of $MAX_RETRIES"
+                if [ $i -lt $MAX_RETRIES ]; then
+                  git pull --rebase origin main
+                else
+                  echo "Failed after $MAX_RETRIES attempts"
+                  exit 1
+                fi
+              fi
+            done
+          fi

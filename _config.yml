@@ -1,0 +1,13 @@
+title: 🏠 記帳
+email: ray120424@gmail.com
+description: >-
+  記帳系統
+baseurl: "/accounting"
+url: ""
+theme: minima
+plugins:
+  - jekyll-feed
+header_pages:
+  - expense.md
+  - budget.md
+  - setting.md

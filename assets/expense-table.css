@@ -1,0 +1,127 @@
+/* Expense table specific styles */
+/* Common styles are in common.css */
+
+/* Sticky summary - when record-cost input is focused and summary not visible */
+.total-container.sticky-active {
+  position: fixed !important;
+  top: 56px; /* Default fallback, dynamically set by JS based on actual header height */
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1999 !important;
+  background: #fff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  margin: 0 !important;
+  padding: 6px 15px !important;
+  border-radius: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.total-container.sticky-active .columns-container {
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.total-container.sticky-active .income-column,
+.total-container.sticky-active .expense-column,
+.total-container.sticky-active .total-column {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.total-container.sticky-active .income-title,
+.total-container.sticky-active .expense-title,
+.total-container.sticky-active .total-title {
+  font-size: 12px !important;
+  margin: 0 !important;
+}
+
+.total-container.sticky-active .income-amount,
+.total-container.sticky-active .expense-amount,
+.total-container.sticky-active .total-amount {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+/* Mobile adjustments for sticky */
+@media (max-width: 768px) {
+  .total-container.sticky-active .income-title,
+  .total-container.sticky-active .expense-title,
+  .total-container.sticky-active .total-title {
+    font-size: 11px !important;
+  }
+
+  .total-container.sticky-active .income-amount,
+  .total-container.sticky-active .expense-amount,
+  .total-container.sticky-active .total-amount {
+    font-size: 13px !important;
+  }
+}
+
+/* Expense page specific: pie chart container */
+.pie-chart-container {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(248, 249, 250, 0.8);
+  border-radius: 12px;
+  border: 3px solid #007bff;
+}
+
+.pie-chart-placeholder {
+  color: #6c757d;
+  font-size: 18px;
+}
+
+/* Expense page responsive overrides */
+@media (max-width: 768px) {
+  .content-container {
+    flex-direction: row !important;
+    width: 100% !important;
+  }
+
+  .total-content-container {
+    width: 50% !important;
+    margin-bottom: 0 !important;
+  }
+
+  .pie-chart-container {
+    width: 45% !important;
+    height: 200px !important;
+    margin: 0 0 0 10px !important;
+  }
+
+  .input-row #actual-cost-input,
+  .input-row #record-cost-input {
+    height: 32px !important;
+    padding: 6px 10px !important;
+    font-size: 16px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .content-container {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .total-content-container {
+    width: 100% !important;
+    margin-bottom: 10px !important;
+  }
+
+  .pie-chart-container {
+    width: 100% !important;
+    height: 180px !important;
+    margin: 0 !important;
+  }
+}
