@@ -2,7 +2,7 @@ title: 🏠 記帳
 email: ray120424@gmail.com
 description: >-
   記帳系統
-baseurl: "/accounting"
+baseurl: "/accounting_demo"
 url: ""
 theme: minima
 plugins:
