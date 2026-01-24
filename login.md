@@ -49,5 +49,6 @@ title: Login
     const errorEl = document.getElementById('error-message');
     errorEl.textContent = '您的帳號未被授權訪問此系統';
     errorEl.style.display = 'block';
-  }
-</script> -->
+  }-->
+登入功能在樣本模式不開放使用，[回到首頁](/accounting)
+<!--</script> -->

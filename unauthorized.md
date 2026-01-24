@@ -1,4 +1,4 @@
----
+<!-- ---
 layout: default
 title: 未授權 - Accounting System
 ---
@@ -26,4 +26,6 @@ title: 未授權 - Accounting System
   if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
     google.accounts.id.disableAutoSelect();
   }
-</script>
+-->
+登入功能在樣本模式不開放使用，[回到首頁](/accounting)
+<!--</script> -->
